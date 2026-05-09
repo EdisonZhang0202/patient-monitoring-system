@@ -1,5 +1,6 @@
 import Vital from "../models/Vital.js";
 import { generateVitals } from "../services/vitalSimulator.js";
+import { getSocketInstance } from "../sockets/socket.js";
 
 export const getVitalsByPatient = async (req, res) => {
   try {
@@ -21,6 +22,9 @@ export const createSimulatedVital = async (req, res) => {
     const vitalData = generateVitals(req.params.patientId);
 
     const vital = await Vital.create(vitalData);
+    const io = getSocketInstance();
+
+  io.emit("vitalUpdate", vital);
 
     res.status(201).json(vital);
   } catch (error) {
