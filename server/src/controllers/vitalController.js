@@ -1,4 +1,5 @@
 import Vital from "../models/Vital.js";
+import { generateVitals } from "../services/vitalSimulator.js";
 
 export const getVitalsByPatient = async (req, res) => {
   try {
@@ -10,6 +11,21 @@ export const getVitalsByPatient = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Failed to fetch vitals",
+      error: error.message,
+    });
+  }
+};
+
+export const createSimulatedVital = async (req, res) => {
+  try {
+    const vitalData = generateVitals(req.params.patientId);
+
+    const vital = await Vital.create(vitalData);
+
+    res.status(201).json(vital);
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to create simulated vital",
       error: error.message,
     });
   }
