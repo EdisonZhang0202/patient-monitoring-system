@@ -4,6 +4,7 @@ import { io } from "socket.io-client";
 function App() {
   const [patients, setPatients] = useState([]);
   const [latestVitals, setLatestVitals] = useState({});
+  const [alerts, setAlerts] = useState([]);
   
   useEffect(() => {
     fetch("http://localhost:5000/api/patients")
@@ -11,25 +12,25 @@ function App() {
     .then((data) => {
       setPatients(data);
       data.forEach(async (patient) => {
-  try {
-    const response = await fetch(
-      `http://localhost:5000/api/patients/${patient._id}/vitals/latest`
-    );
-
-    if (!response.ok) {
-      return;
-    }
-
-    const latestVital = await response.json();
-
-    setLatestVitals((previousVitals) => ({
-      ...previousVitals,
-      [patient._id]: latestVital,
-    }));
-  } catch (error) {
-    console.error("Failed to fetch latest vital:", error);
-  }
-});
+        try {
+          const response = await fetch(
+            `http://localhost:5000/api/patients/${patient._id}/vitals/latest`
+          );
+          
+          if (!response.ok) {
+            return;
+          }
+          
+          const latestVital = await response.json();
+          
+          setLatestVitals((previousVitals) => ({
+            ...previousVitals,
+            [patient._id]: latestVital,
+          }));
+        } catch (error) {
+          console.error("Failed to fetch latest vital:", error);
+        }
+      });
     })
     .catch((error) => {
       console.error("Failed to fetch patients:", error);
@@ -52,16 +53,35 @@ function App() {
       }));
     });
     
+    socket.on("alertCreated", (alert) => {
+      console.log("New alert received:", alert);
+      
+      setAlerts((previousAlerts) => [alert, ...previousAlerts]);
+    });
+    
     return () => {
       socket.disconnect();
     };
   }, []);
-
-
+  
+  
   return (
     <div>
     <h1>Real-Time Patient Monitoring System</h1>
+    <h2>Alerts</h2>
     
+    {alerts.length === 0 ? (
+      <p>No active alerts</p>
+    ) : (
+      alerts.map((alert) => (
+        <div key={alert._id}>
+        <h3>{alert.severity.toUpperCase()} - {alert.type}</h3>
+        <p>{alert.message}</p>
+        <p>Patient ID: {alert.patientId}</p>
+        <p>Acknowledged: {alert.acknowledged ? "Yes" : "No"}</p>
+        </div>
+      ))
+    )}
     <h2>Patients</h2>
     
     {patients.map((patient) => (

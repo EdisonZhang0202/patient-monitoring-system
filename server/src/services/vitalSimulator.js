@@ -5,11 +5,11 @@ const getRandomNumber = (min, max) => {
 export const generateVitals = (patientId) => {
   return {
     patientId,
-    heartRate: getRandomNumber(60, 110),
-    systolicBP: getRandomNumber(100, 145),
-    diastolicBP: getRandomNumber(60, 95),
-    oxygenSaturation: getRandomNumber(94, 100),
-    temperature: Number((Math.random() * (99.5 - 97.5) + 97.5).toFixed(1)),
+    heartRate: getRandomNumber(40, 130),
+    systolicBP: getRandomNumber(100, 220),
+    diastolicBP: getRandomNumber(60, 130),
+    oxygenSaturation: getRandomNumber(88, 100),
+    temperature: Number((Math.random() * (104.5 - 97.5) + 97.5).toFixed(1)),
     timestamp: new Date(),
   };
 };
