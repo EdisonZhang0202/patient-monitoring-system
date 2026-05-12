@@ -5,6 +5,7 @@ import http from "http";
 import app from "./app.js";
 import connectDB from "./config/db.js";
 import { setSocketInstance } from "./sockets/socket.js";
+import { startVitalAutomation } from "./services/vitalAutomation.js";
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ const io = new Server(server, {
 
 setSocketInstance(io);
 initializeSocket(io);
+startVitalAutomation();
 
 
 connectDB();
