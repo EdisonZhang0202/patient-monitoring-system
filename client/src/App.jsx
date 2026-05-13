@@ -1,10 +1,40 @@
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+
+
+const getSeverityColor = (severity) => {
+  switch (severity) {
+    case "critical":
+    return "#ff4d4f";
+    
+    case "high":
+    return "#fa8c16";
+    
+    case "medium":
+    return "#fadb14";
+    
+    case "low":
+    return "#1890ff";
+    
+    default:
+    return "#d9d9d9";
+  }
+};
 
 function App() {
   const [patients, setPatients] = useState([]);
   const [latestVitals, setLatestVitals] = useState({});
   const [alerts, setAlerts] = useState([]);
+  const [vitalsHistory, setVitalsHistory] = useState({});
+  
   
   useEffect(() => {
     fetch("http://localhost:5000/api/patients")
@@ -51,6 +81,20 @@ function App() {
         ...previousVitals,
         [vital.patientId]: vital,
       }));
+      setVitalsHistory((previousHistory) => {
+        const patientHistory = previousHistory[vital.patientId] || [];
+        
+        return {
+          ...previousHistory,
+          [vital.patientId]: [
+            ...patientHistory,
+            {
+              time: new Date(vital.timestamp).toLocaleTimeString(),
+              heartRate: vital.heartRate,
+            },
+          ].slice(-10),
+        };
+      });
     });
     
     socket.on("alertCreated", (alert) => {
@@ -82,7 +126,15 @@ return (
     <p>No active alerts</p>
   ) : (
     alerts.map((alert) => (
-      <div key={alert._id}>
+      <div
+      key={alert._id}
+      style={{
+        border: `2px solid ${getSeverityColor(alert.severity)}`,
+        padding: "10px",
+        marginBottom: "10px",
+        borderRadius: "8px",
+      }}
+      >
       <h3>{alert.severity.toUpperCase()} - {alert.type}</h3>
       <p>{alert.message}</p>
       <p>Patient ID: {alert.patientId}</p>
@@ -128,6 +180,25 @@ return (
       <p>Temperature: {latestVitals[patient._id].temperature}°F</p>
       </div>
     )}
+    {vitalsHistory[patient._id] && (
+  <div style={{ width: "100%", height: 250 }}>
+    <h4>Heart Rate Trend</h4>
+
+    <ResponsiveContainer width="100%" height="100%">
+      <LineChart data={vitalsHistory[patient._id]}>
+        <XAxis dataKey="time" />
+        <YAxis />
+        <Tooltip />
+
+        <Line
+          type="monotone"
+          dataKey="heartRate"
+          stroke="#ff4d4f"
+        />
+      </LineChart>
+    </ResponsiveContainer>
+  </div>
+)}
     </div>
   ))}
   </div>
