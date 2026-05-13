@@ -59,53 +59,79 @@ function App() {
       setAlerts((previousAlerts) => [alert, ...previousAlerts]);
     });
     
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
+    socket.on("alertAcknowledged", (updatedAlert) => {
+      setAlerts((previousAlerts) =>
+        previousAlerts.map((alert) =>
+          alert._id === updatedAlert._id ? updatedAlert : alert
+    )
+  );
+});
+
+return () => {
+  socket.disconnect();
+};
+}, []);
+
+
+return (
+  <div>
+  <h1>Real-Time Patient Monitoring System</h1>
+  <h2>Alerts</h2>
   
-  
-  return (
-    <div>
-    <h1>Real-Time Patient Monitoring System</h1>
-    <h2>Alerts</h2>
-    
-    {alerts.length === 0 ? (
-      <p>No active alerts</p>
-    ) : (
-      alerts.map((alert) => (
-        <div key={alert._id}>
-        <h3>{alert.severity.toUpperCase()} - {alert.type}</h3>
-        <p>{alert.message}</p>
-        <p>Patient ID: {alert.patientId}</p>
-        <p>Acknowledged: {alert.acknowledged ? "Yes" : "No"}</p>
-        </div>
-      ))
-    )}
-    <h2>Patients</h2>
-    
-    {patients.map((patient) => (
-      <div key={patient._id}>
-      <h3>{patient.name}</h3>
-      <p>Room: {patient.room}</p>
-      <p>Diagnosis: {patient.diagnosis}</p>
-      <p>Status: {patient.status}</p>
-      {latestVitals[patient._id] && (
-        <div>
-        <h4>Latest Vitals</h4>
-        <p>Heart Rate: {latestVitals[patient._id].heartRate} bpm</p>
-        <p>
-        Blood Pressure: {latestVitals[patient._id].systolicBP}/
-        {latestVitals[patient._id].diastolicBP} mmHg
-        </p>
-        <p>SpO2: {latestVitals[patient._id].oxygenSaturation}%</p>
-        <p>Temperature: {latestVitals[patient._id].temperature}°F</p>
-        </div>
+  {alerts.length === 0 ? (
+    <p>No active alerts</p>
+  ) : (
+    alerts.map((alert) => (
+      <div key={alert._id}>
+      <h3>{alert.severity.toUpperCase()} - {alert.type}</h3>
+      <p>{alert.message}</p>
+      <p>Patient ID: {alert.patientId}</p>
+      <p>Acknowledged: {alert.acknowledged ? "Yes" : "No"}</p>
+      {!alert.acknowledged && (
+        <button
+        onClick={async () => {
+          try {
+            await fetch(
+              `http://localhost:5000/api/alerts/${alert._id}/acknowledge`,
+              {
+                method: "PATCH",
+              }
+            );
+          } catch (error) {
+            console.error("Failed to acknowledge alert:", error);
+          }
+        }}
+        >
+        Acknowledge
+        </button>
       )}
       </div>
-    ))}
+    ))
+  )}
+  <h2>Patients</h2>
+  
+  {patients.map((patient) => (
+    <div key={patient._id}>
+    <h3>{patient.name}</h3>
+    <p>Room: {patient.room}</p>
+    <p>Diagnosis: {patient.diagnosis}</p>
+    <p>Status: {patient.status}</p>
+    {latestVitals[patient._id] && (
+      <div>
+      <h4>Latest Vitals</h4>
+      <p>Heart Rate: {latestVitals[patient._id].heartRate} bpm</p>
+      <p>
+      Blood Pressure: {latestVitals[patient._id].systolicBP}/
+      {latestVitals[patient._id].diastolicBP} mmHg
+      </p>
+      <p>SpO2: {latestVitals[patient._id].oxygenSaturation}%</p>
+      <p>Temperature: {latestVitals[patient._id].temperature}°F</p>
+      </div>
+    )}
     </div>
-  );
+  ))}
+  </div>
+);
 }
 
 export default App;
