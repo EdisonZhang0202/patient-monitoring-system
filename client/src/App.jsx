@@ -98,17 +98,41 @@ function App() {
     });
     
     socket.on("alertCreated", (alert) => {
-      console.log("New alert received:", alert);
-      
-      setAlerts((previousAlerts) => [alert, ...previousAlerts]);
+      setAlerts((previousAlerts) => {
+        const alreadyExists = previousAlerts.some(
+          (existingAlert) => existingAlert._id === alert._id
+        );
+        
+        if (alreadyExists) {
+          return previousAlerts;
+        }
+        
+        return [alert, ...previousAlerts];
+      });
     });
     
-    socket.on("alertAcknowledged", (updatedAlert) => {
-      setAlerts((previousAlerts) =>
-        previousAlerts.map((alert) =>
-          alert._id === updatedAlert._id ? updatedAlert : alert
-    )
-  );
+    socket.on("alertUpdated", (updatedAlert) => {
+      setAlerts((previousAlerts) => {
+        const alreadyExists = previousAlerts.some(
+          (alert) => alert._id === updatedAlert._id
+        );
+        
+        if (alreadyExists) {
+          return previousAlerts.map((alert) =>
+            alert._id === updatedAlert._id ? updatedAlert : alert
+        );
+      }
+      
+      return [updatedAlert, ...previousAlerts];
+    });
+  });
+  
+  socket.on("alertAcknowledged", (updatedAlert) => {
+    setAlerts((previousAlerts) =>
+      previousAlerts.map((alert) =>
+        alert._id === updatedAlert._id ? updatedAlert : alert
+  )
+);
 });
 
 return () => {
@@ -181,24 +205,24 @@ return (
       </div>
     )}
     {vitalsHistory[patient._id] && (
-  <div style={{ width: "100%", height: 250 }}>
-    <h4>Heart Rate Trend</h4>
-
-    <ResponsiveContainer width="100%" height="100%">
+      <div style={{ width: "100%", height: 250 }}>
+      <h4>Heart Rate Trend</h4>
+      
+      <ResponsiveContainer width="100%" height="100%">
       <LineChart data={vitalsHistory[patient._id]}>
-        <XAxis dataKey="time" />
-        <YAxis />
-        <Tooltip />
-
-        <Line
-          type="monotone"
-          dataKey="heartRate"
-          stroke="#ff4d4f"
-        />
+      <XAxis dataKey="time" />
+      <YAxis />
+      <Tooltip />
+      
+      <Line
+      type="monotone"
+      dataKey="heartRate"
+      stroke="#ff4d4f"
+      />
       </LineChart>
-    </ResponsiveContainer>
-  </div>
-)}
+      </ResponsiveContainer>
+      </div>
+    )}
     </div>
   ))}
   </div>

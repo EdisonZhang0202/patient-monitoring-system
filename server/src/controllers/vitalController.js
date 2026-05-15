@@ -27,11 +27,28 @@ export const createSimulatedVital = async (req, res) => {
     const io = getSocketInstance();
     
     const alertData = evaluateVitals(vital);
-    const alerts = await Alert.insertMany(alertData);
-    
-    alerts.forEach((alert) => {
-      io.emit("alertCreated", alert);
-    });
+
+for (const alertItem of alertData) {
+  const existingAlert = await Alert.findOne({
+    patientId: alertItem.patientId,
+    type: alertItem.type,
+    acknowledged: false,
+  });
+
+  if (existingAlert) {
+    existingAlert.message = alertItem.message;
+    existingAlert.severity = alertItem.severity;
+    existingAlert.timestamp = new Date();
+
+    await existingAlert.save();
+
+    io.emit("alertUpdated", existingAlert);
+  } else {
+    const newAlert = await Alert.create(alertItem);
+
+    io.emit("alertCreated", newAlert);
+  }
+}
     
     io.emit("vitalUpdate", vital);
     
