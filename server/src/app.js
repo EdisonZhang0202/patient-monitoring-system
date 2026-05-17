@@ -4,6 +4,7 @@ import healthRoutes from "./routes/healthRoutes.js";
 import patientRoutes from "./routes/patientRoutes.js";
 import vitalRoutes from "./routes/vitalRoutes.js";
 import alertRoutes from "./routes/alertRoutes.js";
+import eventLogRoutes from "./routes/eventLogRoutes.js";
 
 const app = express();
 
@@ -14,5 +15,6 @@ app.use("/health", healthRoutes);
 app.use("/api/patients", patientRoutes);
 app.use("/api", vitalRoutes);
 app.use("/api/alerts", alertRoutes);
+app.use("/api/events", eventLogRoutes);
 
 export default app;

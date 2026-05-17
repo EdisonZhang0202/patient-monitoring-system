@@ -4,6 +4,7 @@ import Alert from "../models/Alert.js";
 
 import { generateVitals } from "./vitalSimulator.js";
 import { evaluateVitals } from "./alertEngine.js";
+import { logEvent } from "./eventLogger.js";
 
 import { getSocketInstance } from "../sockets/socket.js";
 
@@ -18,6 +19,20 @@ export const startVitalAutomation = () => {
         const vitalData = generateVitals(patient._id);
         
         const vital = await Vital.create(vitalData);
+        
+        await logEvent({
+          patientId: patient._id,
+          eventType: "VITAL_GENERATED",
+          description: `Generated vitals for patient ${patient.name}`,
+          metadata: {
+            vitalId: vital._id,
+            heartRate: vital.heartRate,
+            systolicBP: vital.systolicBP,
+            diastolicBP: vital.diastolicBP,
+            oxygenSaturation: vital.oxygenSaturation,
+            temperature: vital.temperature,
+          },
+        });
         
         io.emit("vitalUpdate", vital);
         
@@ -36,11 +51,31 @@ export const startVitalAutomation = () => {
             existingAlert.timestamp = new Date();
             
             await existingAlert.save();
-            
+            await logEvent({
+              patientId: patient._id,
+              eventType: "ALERT_UPDATED",
+              description: `Updated ${existingAlert.type} alert for patient ${patient.name}`,
+              metadata: {
+                alertId: existingAlert._id,
+                type: existingAlert.type,
+                severity: existingAlert.severity,
+                message: existingAlert.message,
+              },
+            });
             io.emit("alertUpdated", existingAlert);
           } else {
             const newAlert = await Alert.create(alertItem);
-            
+            await logEvent({
+              patientId: patient._id,
+              eventType: "ALERT_CREATED",
+              description: `Created ${newAlert.type} alert for patient ${patient.name}`,
+              metadata: {
+                alertId: newAlert._id,
+                type: newAlert.type,
+                severity: newAlert.severity,
+                message: newAlert.message,
+              },
+            });
             io.emit("alertCreated", newAlert);
           }
         }
