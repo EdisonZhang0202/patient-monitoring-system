@@ -192,12 +192,30 @@ const patientAlertMap = useMemo(() => {
   }, {});
 }, [alerts]);
 
+
 const patientLookup = useMemo(() => {
   return patients.reduce((map, patient) => {
     map[patient._id] = patient;
     return map;
   }, {});
 }, [patients]);
+
+const alertsByPatient = useMemo(() => {
+  return alerts.reduce((groups, alert) => {
+    const patient = patientLookup[alert.patientId];
+    const patientKey = alert.patientId;
+    
+    if (!groups[patientKey]) {
+      groups[patientKey] = {
+        patient,
+        alerts: [],
+      };
+    }
+    
+    groups[patientKey].alerts.push(alert);
+    return groups;
+  }, {});
+}, [alerts, patientLookup]);
 
 const sortedPatients = useMemo(() => {
   return [...patients].sort((a, b) => {
@@ -447,24 +465,22 @@ return (
   <div className="active-alert-list">
   <h3>Current Alerts</h3>
   
-  {alerts.slice(0, 8).map((alert) => {
-    const alertPatient = patientLookup[alert.patientId];
-    
-    return (
-      <div className="active-alert-card" key={alert._id}>
-      <div>
-      <strong style={{ color: getSeverityColor(alert.severity) }}>
-      {alert.type}
-      </strong>
+  {Object.entries(alertsByPatient).map(([patientId, group]) => (
+    <div className="patient-alert-group" key={patientId}>
+    <h4>
+    {group.patient
+      ? `${group.patient.name} · Room ${group.patient.room}`
+      : "Unknown patient"}
+      </h4>
       
-      <p>{alert.message}</p>
-      
-      <p className="alert-patient">
-      {alertPatient
-        ? `${alertPatient.name} · Room ${alertPatient.room}`
-        : "Unknown patient"}
-        </p>
+      {group.alerts.map((alert) => (
+        <div className="active-alert-card" key={alert._id}>
+        <div>
+        <strong style={{ color: getSeverityColor(alert.severity) }}>
+        {alert.type}
+        </strong>
         
+        <p>{alert.message}</p>
         <small>{new Date(alert.timestamp).toLocaleString()}</small>
         </div>
         
@@ -476,8 +492,9 @@ return (
         ✓
         </button>
         </div>
-      );
-    })}
+      ))}
+      </div>
+    ))}
     </div>
     </aside>
     </main>
