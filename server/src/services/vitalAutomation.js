@@ -83,5 +83,5 @@ export const startVitalAutomation = () => {
     } catch (error) {
       console.error("Vital automation failed:", error.message);
     }
-  }, 5000);
+  }, 10000);
 };
