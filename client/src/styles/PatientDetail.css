@@ -1,0 +1,131 @@
+.patient-detail-page {
+  min-height: 100vh;
+  padding: 24px;
+  background: #020617;
+  color: #e5e7eb;
+}
+
+.back-link,
+.section-link {
+  color: #93c5fd;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.patient-header,
+.detail-section {
+  margin-top: 20px;
+  padding: 22px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.9);
+}
+
+.patient-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.patient-label {
+  color: #60a5fa;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.patient-header h1 {
+  margin: 0;
+  font-size: 34px;
+}
+
+.patient-subtitle {
+  color: #94a3b8;
+}
+
+.patient-status {
+  padding: 8px 14px;
+  border: 1px solid #22c55e;
+  border-radius: 999px;
+  color: #22c55e;
+  text-transform: capitalize;
+  font-weight: 800;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.section-header h2 {
+  margin: 0;
+}
+
+.empty-state {
+  color: #22c55e;
+  font-weight: 700;
+}
+
+.alert-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.alert-card,
+.preview-card,
+.chart-card {
+  padding: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 14px;
+  background: rgba(2, 6, 23, 0.55);
+}
+
+.alert-card {
+  border-width: 2px;
+}
+
+.alert-card-header {
+  display: flex;
+  justify-content: space-between;
+  text-transform: capitalize;
+}
+
+.chart-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.preview-list {
+  display: grid;
+  gap: 10px;
+}
+
+.preview-card strong {
+  color: #f8fafc;
+}
+
+.preview-card p,
+.alert-card p {
+  color: #cbd5e1;
+}
+
+.preview-card small,
+.alert-card small {
+  color: #94a3b8;
+}
+
+@media (max-width: 900px) {
+  .patient-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .chart-layout {
+    grid-template-columns: 1fr;
+  }
+}

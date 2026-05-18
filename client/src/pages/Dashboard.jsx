@@ -73,19 +73,37 @@ function Dashboard() {
       data.forEach(async (patient) => {
         try {
           const response = await fetch(
-            `http://localhost:5000/api/patients/${patient._id}/vitals/latest`
+            `http://localhost:5000/api/patients/${patient._id}/vitals`
           );
           
           if (!response.ok) return;
           
-          const latestVital = await response.json();
+          const vitals = await response.json();
           
-          setLatestVitals((previousVitals) => ({
-            ...previousVitals,
-            [patient._id]: latestVital,
-          }));
+          const recentVitals = vitals.slice(0, 10).reverse();
+          
+          if (recentVitals.length > 0) {
+            const latestVital = recentVitals[recentVitals.length - 1];
+            
+            setLatestVitals((previousVitals) => ({
+              ...previousVitals,
+              [patient._id]: latestVital,
+            }));
+            
+            setVitalsHistory((previousHistory) => ({
+              ...previousHistory,
+              [patient._id]: recentVitals.map((vital) => ({
+                time: new Date(vital.timestamp).toLocaleTimeString(),
+                heartRate: vital.heartRate,
+                systolicBP: vital.systolicBP,
+                diastolicBP: vital.diastolicBP,
+                oxygenSaturation: vital.oxygenSaturation,
+                temperature: vital.temperature,
+              })),
+            }));
+          }
         } catch (error) {
-          console.error("Failed to fetch latest vital:", error);
+          console.error("Failed to fetch patient vitals:", error);
         }
       });
     })
@@ -128,6 +146,10 @@ function Dashboard() {
             {
               time: new Date(vital.timestamp).toLocaleTimeString(),
               heartRate: vital.heartRate,
+              systolicBP: vital.systolicBP,
+              diastolicBP: vital.diastolicBP,
+              oxygenSaturation: vital.oxygenSaturation,
+              temperature: vital.temperature,
             },
           ].slice(-10),
         };
@@ -377,21 +399,50 @@ return (
       
       {vitalsHistory[patient._id] && (
         <div className="chart-box">
-        <h4>Heart Rate Trend</h4>
-        <ResponsiveContainer width="100%" height={130}>
+        <h4>Trends</h4>
+        
+        <div className="mini-chart-grid">
+        <div className="mini-chart-card">
+        <span>HR</span>
+        <ResponsiveContainer width="100%" height={90}>
         <LineChart data={vitalsHistory[patient._id]}>
-        <XAxis dataKey="time" hide />
-        <YAxis hide domain={["dataMin - 10", "dataMax + 10"]} />
         <Tooltip />
-        <Line
-        type="monotone"
-        dataKey="heartRate"
-        stroke={getSeverityColor(highestSeverity)}
-        strokeWidth={2}
-        dot={false}
-        />
+        <Line type="monotone" dataKey="heartRate" stroke="#ef4444" strokeWidth={2} dot={false} />
         </LineChart>
         </ResponsiveContainer>
+        </div>
+        
+        <div className="mini-chart-card">
+        <span>BP</span>
+        <ResponsiveContainer width="100%" height={90}>
+        <LineChart data={vitalsHistory[patient._id]}>
+        <Tooltip />
+        <Line type="monotone" dataKey="systolicBP" stroke="#f97316" strokeWidth={2} dot={false} />
+        <Line type="monotone" dataKey="diastolicBP" stroke="#facc15" strokeWidth={2} dot={false} />
+        </LineChart>
+        </ResponsiveContainer>
+        </div>
+        
+        <div className="mini-chart-card">
+        <span>SpO₂</span>
+        <ResponsiveContainer width="100%" height={90}>
+        <LineChart data={vitalsHistory[patient._id]}>
+        <Tooltip />
+        <Line type="monotone" dataKey="oxygenSaturation" stroke="#3b82f6" strokeWidth={2} dot={false} />
+        </LineChart>
+        </ResponsiveContainer>
+        </div>
+        
+        <div className="mini-chart-card">
+        <span>Temp</span>
+        <ResponsiveContainer width="100%" height={90}>
+        <LineChart data={vitalsHistory[patient._id]}>
+        <Tooltip />
+        <Line type="monotone" dataKey="temperature" stroke="#a855f7" strokeWidth={2} dot={false} />
+        </LineChart>
+        </ResponsiveContainer>
+        </div>
+        </div>
         </div>
       )}
       
