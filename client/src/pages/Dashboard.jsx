@@ -9,6 +9,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import AddPatientModal from "../components/AddPatientModal/AddPatientModal";
 import "../styles/Dashboard.css";
 
 const getSeverityRank = (severity) => {
@@ -63,6 +64,7 @@ function Dashboard() {
   const [alerts, setAlerts] = useState([]);
   const [vitalsHistory, setVitalsHistory] = useState({});
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [isAddPatientOpen, setIsAddPatientOpen] = useState(false);
   
   useEffect(() => {
     fetch("http://localhost:5000/api/patients")
@@ -292,6 +294,13 @@ const acknowledgeAlert = async (alertId) => {
   }
 };
 
+const handlePatientCreated = (createdPatient) => {
+  setPatients((previousPatients) => [
+    createdPatient,
+    ...previousPatients,
+  ]);
+};
+
 return (
   <div className="dashboard">
   <header className="dashboard-header">
@@ -309,6 +318,12 @@ return (
   <span className="live-dot" />
   <span>Live</span>
   </div>
+  <button
+  className="add-patient-button"
+  onClick={() => setIsAddPatientOpen(true)}
+>
+  + Add New Patient
+</button>
   </header>
   
   <main className="dashboard-layout">
@@ -549,6 +564,11 @@ return (
     </div>
     </aside>
     </main>
+    <AddPatientModal
+  isOpen={isAddPatientOpen}
+  onClose={() => setIsAddPatientOpen(false)}
+  onPatientCreated={handlePatientCreated}
+/>
     </div>
   );
 }
