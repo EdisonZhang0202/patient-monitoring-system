@@ -1,0 +1,149 @@
+.patient-card,
+.patient-card * {
+  color: #e5e7eb;
+}
+
+.patient-card-header p,
+.vital-box span,
+.vital-box small,
+.mini-chart-card span {
+  color: #94a3b8;
+}
+
+.patient-card-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.patient-card {
+  border: 2px solid rgba(148, 163, 184, 0.2);
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.92);
+  padding: 18px;
+  transition: 0.2s ease;
+}
+
+.patient-card:hover {
+  transform: translateY(-2px);
+}
+
+.patient-card-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.status-pill {
+  border: 1px solid;
+  border-radius: 999px;
+  padding: 6px 12px;
+  height: fit-content;
+  text-transform: capitalize;
+  font-weight: 700;
+}
+
+.vitals-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.vital-box {
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(2, 6, 23, 0.5);
+}
+
+.vital-box span {
+  display: block;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.vital-box strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 18px;
+}
+
+.chart-box {
+  margin-top: 14px;
+}
+
+.mini-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.mini-chart-card {
+  padding: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 10px;
+  background: rgba(2, 6, 23, 0.45);
+}
+
+.mini-chart-card span {
+  display: block;
+  margin-bottom: 4px;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.card-alerts {
+  margin-top: 16px;
+}
+
+.alert-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.alert-chip {
+  border: 1px solid;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  text-transform: capitalize;
+}
+
+.no-alerts {
+  color: #22c55e;
+  font-weight: 700;
+}
+
+.patient-card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.patient-card-button {
+  flex: 1;
+  text-align: center;
+  text-decoration: none;
+  border: 1px solid rgba(59, 130, 246, 0.5);
+  border-radius: 10px;
+  padding: 9px 12px;
+  background: rgba(37, 99, 235, 0.25);
+  color: #93c5fd;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.patient-card-button.secondary {
+  background: rgba(15, 23, 42, 0.75);
+  color: #e5e7eb;
+  border-color: rgba(148, 163, 184, 0.35);
+}
+
+.patient-card-button:hover {
+  background: rgba(37, 99, 235, 0.45);
+}
+
+.patient-card-button.secondary:hover {
+  background: rgba(51, 65, 85, 0.75);
+}

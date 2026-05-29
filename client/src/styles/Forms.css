@@ -1,0 +1,13 @@
+.add-patient-button {
+  border: none;
+  border-radius: 12px;
+  padding: 10px 14px;
+  background: #2563eb;
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.add-patient-button:hover {
+  background: #1d4ed8;
+}

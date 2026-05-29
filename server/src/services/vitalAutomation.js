@@ -11,7 +11,9 @@ import { getSocketInstance } from "../sockets/socket.js";
 export const startVitalAutomation = () => {
   setInterval(async () => {
     try {
-      const patients = await Patient.find();
+      const patients = await Patient.find({
+        status: { $ne: "discharged" },
+      });
       
       const io = getSocketInstance();
       

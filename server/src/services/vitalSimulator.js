@@ -9,11 +9,11 @@ const getRandomFloat = (min, max) => {
 const chooseRange = (normalRange, abnormalRange, criticalRange) => {
   const chance = Math.random();
 
-  if (chance < 0.94) {
+  if (chance < 0.99) {
     return normalRange;
   }
 
-  if (chance < 0.98) {
+  if (chance < 0.998) {
     return abnormalRange;
   }
 

@@ -24,7 +24,7 @@ const patientSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["stable", "monitoring", "critical"],
+      enum: ["stable", "monitoring", "critical", "discharged"],
       default: "stable",
     },
   },

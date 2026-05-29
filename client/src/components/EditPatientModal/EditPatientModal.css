@@ -1,0 +1,56 @@
+.edit-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.72);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 50;
+}
+
+.edit-patient-modal {
+  width: min(460px, 92vw);
+  display: grid;
+  gap: 12px;
+  padding: 22px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 18px;
+  background: #0f172a;
+}
+
+.edit-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.edit-modal-header h2 {
+  margin: 0;
+}
+
+.edit-modal-close {
+  border: none;
+  background: transparent;
+  color: #e5e7eb;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.edit-patient-modal input,
+.edit-patient-modal select {
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 10px;
+  padding: 11px 12px;
+  background: rgba(2, 6, 23, 0.75);
+  color: #e5e7eb;
+}
+
+.edit-modal-submit {
+  border: none;
+  border-radius: 10px;
+  padding: 11px 14px;
+  background: #2563eb;
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+}

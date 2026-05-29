@@ -44,3 +44,26 @@ export const getPatientById = async (req, res) => {
     });
   }
 };
+
+export const updatePatient = async (req, res) => {
+  try {
+    const patient = await Patient.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { returnDocument: "after", runValidators: true }
+    );
+
+    if (!patient) {
+      return res.status(404).json({
+        message: "Patient not found",
+      });
+    }
+
+    res.status(200).json(patient);
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to update patient",
+      error: error.message,
+    });
+  }
+};
