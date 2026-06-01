@@ -25,6 +25,7 @@ function Dashboard() {
   const [isAddPatientOpen, setIsAddPatientOpen] = useState(false);
   const [isEditPatientOpen, setIsEditPatientOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
+  const [patientFilter, setPatientFilter] = useState("all");
   
   useDashboardData({
     setPatients,
@@ -101,6 +102,43 @@ function Dashboard() {
 });
 }, [patients, patientAlertMap]);
 
+const filteredPatients = useMemo(() => {
+  switch (patientFilter) {
+    case "critical":
+      return sortedPatients.filter((patient) => {
+        const alerts = patientAlertMap[patient._id] || [];
+
+        return alerts.some(
+          (alert) => alert.severity === "critical"
+        );
+      });
+
+    case "high":
+      return sortedPatients.filter((patient) => {
+        const alerts = patientAlertMap[patient._id] || [];
+
+        return alerts.some(
+          (alert) => alert.severity === "high"
+        );
+      });
+
+    case "stable":
+      return sortedPatients.filter(
+        (patient) =>
+          patient.status === "stable" &&
+          (patientAlertMap[patient._id] || []).length === 0
+      );
+
+    case "discharged":
+      return sortedPatients.filter(
+        (patient) => patient.status === "discharged"
+      );
+
+    default:
+      return sortedPatients;
+  }
+}, [sortedPatients, patientFilter, patientAlertMap]);
+
 const alertSummary = useMemo(() => {
   return alerts.reduce((summary, alert) => {
     if (!summary[alert.type]) {
@@ -170,12 +208,48 @@ return (
   <main className="dashboard-layout">
   <section className="patients-section">
   <div className="section-title">
+  <div className="patient-filters">
+  <button
+    className={patientFilter === "all" ? "active" : ""}
+    onClick={() => setPatientFilter("all")}
+  >
+    All
+  </button>
+
+  <button
+    className={patientFilter === "critical" ? "active" : ""}
+    onClick={() => setPatientFilter("critical")}
+  >
+    Critical
+  </button>
+
+  <button
+    className={patientFilter === "high" ? "active" : ""}
+    onClick={() => setPatientFilter("high")}
+  >
+    High
+  </button>
+
+  <button
+    className={patientFilter === "stable" ? "active" : ""}
+    onClick={() => setPatientFilter("stable")}
+  >
+    Stable
+  </button>
+
+  <button
+    className={patientFilter === "discharged" ? "active" : ""}
+    onClick={() => setPatientFilter("discharged")}
+  >
+    Discharged
+  </button>
+</div>
   <h2>Patients</h2>
   <span>Alerts shown first</span>
   </div>
   
   <div className="patient-grid">
-  {sortedPatients.map((patient) => {
+  {filteredPatients.map((patient) => {
     const vital =
     latestVitals[patient._id];
     
