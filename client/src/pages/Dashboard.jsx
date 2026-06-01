@@ -26,6 +26,7 @@ function Dashboard() {
   const [isEditPatientOpen, setIsEditPatientOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [patientFilter, setPatientFilter] = useState("all");
+  const [patientSearch, setPatientSearch] = useState("");
   
   useDashboardData({
     setPatients,
@@ -139,6 +140,22 @@ const filteredPatients = useMemo(() => {
   }
 }, [sortedPatients, patientFilter, patientAlertMap]);
 
+const searchedPatients = useMemo(() => {
+  const searchValue = patientSearch.toLowerCase().trim();
+
+  if (!searchValue) {
+    return filteredPatients;
+  }
+
+  return filteredPatients.filter((patient) => {
+    return (
+      patient.name.toLowerCase().includes(searchValue) ||
+      patient.room.toLowerCase().includes(searchValue) ||
+      patient.diagnosis.toLowerCase().includes(searchValue)
+    );
+  });
+}, [filteredPatients, patientSearch]);
+
 const alertSummary = useMemo(() => {
   return alerts.reduce((summary, alert) => {
     if (!summary[alert.type]) {
@@ -243,13 +260,20 @@ return (
   >
     Discharged
   </button>
+  <input
+  className="patient-search"
+  placeholder="Search patients by name, room, or diagnosis..."
+  value={patientSearch}
+  onChange={(event) => setPatientSearch(event.target.value)}
+/>
 </div>
+
   <h2>Patients</h2>
   <span>Alerts shown first</span>
   </div>
   
   <div className="patient-grid">
-  {filteredPatients.map((patient) => {
+  {searchedPatients.map((patient) => {
     const vital =
     latestVitals[patient._id];
     
