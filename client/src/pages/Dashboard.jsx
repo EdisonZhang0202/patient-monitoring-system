@@ -5,6 +5,7 @@ import AlertsPanel from "../components/AlertsPanel/AlertsPanel";
 import DashboardHeader from "../components/DashboardHeader/DashboardHeader";
 import PatientCard from "../components/PatientCard/PatientCard";
 import EditPatientModal from "../components/EditPatientModal/EditPatientModal";
+import DashboardStats from "../components/DashboardStats/DashboardStats";
 
 import {
   getSeverityRank,
@@ -221,6 +222,8 @@ return (
     setIsAddPatientOpen(true)
   }
   />
+
+  <DashboardStats patients={patients} alerts={alerts} />
   
   <main className="dashboard-layout">
   <section className="patients-section">
