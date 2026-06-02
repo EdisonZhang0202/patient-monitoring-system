@@ -1,5 +1,6 @@
 import PatientNote from "../models/PatientNote.js";
 import { logEvent } from "../services/eventLogger.js";
+import { getSocketInstance } from "../sockets/socket.js";
 
 export const getPatientNotes = async (req, res) => {
   try {
@@ -34,6 +35,9 @@ export const createPatientNote = async (req, res) => {
         note: note.note,
       },
     });
+    const io = getSocketInstance();
+
+    io.emit("noteCreated", note);
 
     res.status(201).json(note);
   } catch (error) {
