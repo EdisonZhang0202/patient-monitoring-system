@@ -6,6 +6,7 @@ import DashboardHeader from "../components/DashboardHeader/DashboardHeader";
 import PatientCard from "../components/PatientCard/PatientCard";
 import EditPatientModal from "../components/EditPatientModal/EditPatientModal";
 import DashboardStats from "../components/DashboardStats/DashboardStats";
+import AlertDetailsModal from "../components/AlertDetailsModal/AlertDetailsModal";
 
 import {
   getSeverityRank,
@@ -28,6 +29,7 @@ function Dashboard() {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [patientFilter, setPatientFilter] = useState("all");
   const [patientSearch, setPatientSearch] = useState("");
+  const [selectedAlert, setSelectedAlert] = useState(null);
   
   useDashboardData({
     setPatients,
@@ -80,11 +82,21 @@ function Dashboard() {
       return groups;
     }, {});
   }, [alerts, patientLookup]);
+
+  const selectedPatientAlerts = selectedAlert
+  ? alertsByPatient[selectedAlert.patientId]?.alerts || []
+  : [];
   
   const sortedPatients = useMemo(() => {
     return [...patients].sort((a, b) => {
       const aAlerts = patientAlertMap[a._id] || [];
       const bAlerts = patientAlertMap[b._id] || [];
+      
+      const aDischarged = a.status === "discharged";
+      const bDischarged = b.status === "discharged";
+      
+      if (aDischarged && !bDischarged) return 1;
+      if (!aDischarged && bDischarged) return -1;
       
       const aHighest = Math.max(
         0,
@@ -100,54 +112,70 @@ function Dashboard() {
     )
   );
   
-  return bHighest - aHighest;
+  if (aHighest !== bHighest) {
+    return bHighest - aHighest;
+  }
+  
+  if (aAlerts.length !== bAlerts.length) {
+    return bAlerts.length - aAlerts.length;
+  }
+  
+  return a.name.localeCompare(b.name);
 });
 }, [patients, patientAlertMap]);
+
+const selectedAlertPatient = selectedAlert
+? patientLookup[selectedAlert.patientId]
+: null;
+
+const selectedAlertVital = selectedAlert
+? latestVitals[selectedAlert.patientId]
+: null;
 
 const filteredPatients = useMemo(() => {
   switch (patientFilter) {
     case "critical":
-      return sortedPatients.filter((patient) => {
-        const alerts = patientAlertMap[patient._id] || [];
-
-        return alerts.some(
-          (alert) => alert.severity === "critical"
-        );
-      });
-
+    return sortedPatients.filter((patient) => {
+      const alerts = patientAlertMap[patient._id] || [];
+      
+      return alerts.some(
+        (alert) => alert.severity === "critical"
+      );
+    });
+    
     case "high":
-      return sortedPatients.filter((patient) => {
-        const alerts = patientAlertMap[patient._id] || [];
-
-        return alerts.some(
-          (alert) => alert.severity === "high"
-        );
-      });
-
+    return sortedPatients.filter((patient) => {
+      const alerts = patientAlertMap[patient._id] || [];
+      
+      return alerts.some(
+        (alert) => alert.severity === "high"
+      );
+    });
+    
     case "stable":
-      return sortedPatients.filter(
-        (patient) =>
-          patient.status === "stable" &&
-          (patientAlertMap[patient._id] || []).length === 0
-      );
-
+    return sortedPatients.filter(
+      (patient) =>
+        patient.status === "stable" &&
+      (patientAlertMap[patient._id] || []).length === 0
+    );
+    
     case "discharged":
-      return sortedPatients.filter(
-        (patient) => patient.status === "discharged"
-      );
-
+    return sortedPatients.filter(
+      (patient) => patient.status === "discharged"
+    );
+    
     default:
-      return sortedPatients;
+    return sortedPatients;
   }
 }, [sortedPatients, patientFilter, patientAlertMap]);
 
 const searchedPatients = useMemo(() => {
   const searchValue = patientSearch.toLowerCase().trim();
-
+  
   if (!searchValue) {
     return filteredPatients;
   }
-
+  
   return filteredPatients.filter((patient) => {
     return (
       patient.name.toLowerCase().includes(searchValue) ||
@@ -222,7 +250,7 @@ return (
     setIsAddPatientOpen(true)
   }
   />
-
+  
   <DashboardStats patients={patients} alerts={alerts} />
   
   <main className="dashboard-layout">
@@ -230,47 +258,47 @@ return (
   <div className="section-title">
   <div className="patient-filters">
   <button
-    className={patientFilter === "all" ? "active" : ""}
-    onClick={() => setPatientFilter("all")}
+  className={patientFilter === "all" ? "active" : ""}
+  onClick={() => setPatientFilter("all")}
   >
-    All
+  All
   </button>
-
+  
   <button
-    className={patientFilter === "critical" ? "active" : ""}
-    onClick={() => setPatientFilter("critical")}
+  className={patientFilter === "critical" ? "active" : ""}
+  onClick={() => setPatientFilter("critical")}
   >
-    Critical
+  Critical
   </button>
-
+  
   <button
-    className={patientFilter === "high" ? "active" : ""}
-    onClick={() => setPatientFilter("high")}
+  className={patientFilter === "high" ? "active" : ""}
+  onClick={() => setPatientFilter("high")}
   >
-    High
+  High
   </button>
-
+  
   <button
-    className={patientFilter === "stable" ? "active" : ""}
-    onClick={() => setPatientFilter("stable")}
+  className={patientFilter === "stable" ? "active" : ""}
+  onClick={() => setPatientFilter("stable")}
   >
-    Stable
+  Stable
   </button>
-
+  
   <button
-    className={patientFilter === "discharged" ? "active" : ""}
-    onClick={() => setPatientFilter("discharged")}
+  className={patientFilter === "discharged" ? "active" : ""}
+  onClick={() => setPatientFilter("discharged")}
   >
-    Discharged
+  Discharged
   </button>
   <input
   className="patient-search"
   placeholder="Search patients by name, room, or diagnosis..."
   value={patientSearch}
   onChange={(event) => setPatientSearch(event.target.value)}
-/>
-</div>
-
+  />
+  </div>
+  
   <h2>Patients</h2>
   <span>Alerts shown first</span>
   </div>
@@ -305,6 +333,7 @@ return (
   alertSummary={alertSummary}
   alertsByPatient={alertsByPatient}
   acknowledgeAlert={acknowledgeAlert}
+  onAlertClick={setSelectedAlert}
   />
   </main>
   
@@ -323,7 +352,16 @@ return (
     setSelectedPatient(null);
   }}
   onPatientUpdated={handlePatientUpdated}
-/>
+  />
+  <AlertDetailsModal
+  isOpen={Boolean(selectedAlert)}
+  alert={selectedAlert}
+  alerts={selectedPatientAlerts}
+  patient={selectedAlertPatient}
+  latestVital={selectedAlertVital}
+  onClose={() => setSelectedAlert(null)}
+  onAcknowledge={acknowledgeAlert}
+  />
   </div>
 );
 }

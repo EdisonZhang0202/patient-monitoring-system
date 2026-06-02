@@ -43,3 +43,11 @@ export const getVitalForAlertType = (type) => {
       return "Vitals";
   }
 };
+
+export const sortAlertsBySeverity = (alerts) => {
+  return [...alerts].sort(
+    (a, b) =>
+      getSeverityRank(b.severity) -
+      getSeverityRank(a.severity)
+  );
+};

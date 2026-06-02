@@ -3,7 +3,9 @@ import MiniVitalsCharts from "../MiniVitalsCharts/MiniVitalsCharts";
 import {
   getSeverityRank,
   getSeverityColor,
+  sortAlertsBySeverity,
 } from "../../utils/severity";
+import "./PatientCard.css";
 
 function PatientCard({
   patient,
@@ -22,6 +24,44 @@ function PatientCard({
   : highest
 ).severity
 : "stable";
+
+const getAlertForVital = (vitalType) => {
+  return patientAlerts.find((alert) => {
+    if (vitalType === "heartRate") {
+      return (
+        alert.type === "tachycardia" ||
+        alert.type === "bradycardia"
+      );
+    }
+    
+    if (vitalType === "bloodPressure") {
+      return alert.type === "hypertension";
+    }
+    
+    if (vitalType === "oxygenSaturation") {
+      return alert.type === "hypoxia";
+    }
+    
+    if (vitalType === "temperature") {
+      return alert.type === "fever";
+    }
+    
+    return false;
+  });
+};
+
+const getVitalBoxStyle = (vitalType) => {
+  const alert = getAlertForVital(vitalType);
+  
+  if (!alert) {
+    return {};
+  }
+  
+  return {
+    borderColor: getSeverityColor(alert.severity),
+    boxShadow: `0 0 0 1px ${getSeverityColor(alert.severity)}`,
+  };
+};
 
 const isDischarged = patient.status === "discharged";
 
@@ -67,13 +107,19 @@ return (
   
   {vital && (
     <div className="vitals-grid">
-    <div className="vital-box">
+    <div
+    className="vital-box"
+    style={getVitalBoxStyle("heartRate")}
+    >
     <span>HR</span>
     <strong>{vital.heartRate}</strong>
     <small>bpm</small>
     </div>
     
-    <div className="vital-box">
+    <div
+    className="vital-box"
+    style={getVitalBoxStyle("bloodPressure")}
+    >
     <span>BP</span>
     <strong>
     {vital.systolicBP}/{vital.diastolicBP}
@@ -81,13 +127,19 @@ return (
     <small>mmHg</small>
     </div>
     
-    <div className="vital-box">
+    <div
+    className="vital-box"
+    style={getVitalBoxStyle("oxygenSaturation")}
+    >
     <span>SpO₂</span>
     <strong>{vital.oxygenSaturation}%</strong>
     <small>oxygen</small>
     </div>
     
-    <div className="vital-box">
+    <div
+    className="vital-box"
+    style={getVitalBoxStyle("temperature")}
+    >
     <span>Temp</span>
     <strong>{vital.temperature}°F</strong>
     <small>temp</small>
@@ -105,7 +157,7 @@ return (
     <p className="alert-label">Active Alerts</p>
     
     <div className="alert-chip-list">
-    {patientAlerts.map((alert) => (
+    {sortAlertsBySeverity(patientAlerts).map((alert) => (
       <span
       key={alert._id}
       className="alert-chip"
