@@ -1,4 +1,5 @@
 import "./AlertDetailsModal.css";
+import { sortAlertsBySeverity } from "../../utils/severity";
 
 function AlertDetailsModal({
     isOpen,
@@ -20,6 +21,8 @@ function AlertDetailsModal({
     const highCount = alerts.filter(
         (alert) => alert.severity === "high"
     ).length;
+
+    const sortedAlerts = sortAlertsBySeverity(alerts);
 
     return (
         <div className="alert-modal-backdrop">
@@ -71,7 +74,7 @@ function AlertDetailsModal({
                 <div className="alert-message-box">
                     <h3>Active Alerts</h3>
 
-                    {alerts.map((patientAlert) => (
+                    {sortedAlerts.map((patientAlert) => (
                         <div key={patientAlert._id} className="modal-alert-row">
                             <div className="modal-alert-title">
                                 <div className="modal-alert-info">
@@ -117,7 +120,7 @@ function AlertDetailsModal({
                         type="button"
                         className="alert-ack-button"
                         onClick={() => {
-                            alerts.forEach((patientAlert) => {
+                            sortedAlerts.forEach((patientAlert) => {
                                 onAcknowledge(patientAlert._id);
                             });
 
