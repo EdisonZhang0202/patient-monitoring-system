@@ -1,6 +1,7 @@
 import {
   getSeverityColor,
   sortAlertsBySeverity,
+  getSeverityRank,
 } from "../../utils/severity";
 import "./AlertsPanel.css";
 
@@ -49,18 +50,8 @@ function AlertsPanel({
       };
     })
     .sort((a, b) => {
-      const aHighest = sortAlertsBySeverity(a.alerts)[0];
-      const bHighest = sortAlertsBySeverity(b.alerts)[0];
-
-      const severityOrder = {
-        critical: 4,
-        high: 3,
-        medium: 2,
-        low: 1,
-      };
-
-      const aRank = severityOrder[aHighest?.severity] || 0;
-      const bRank = severityOrder[bHighest?.severity] || 0;
+      const aRank = getSeverityRank(a.highestSeverity);
+      const bRank = getSeverityRank(b.highestSeverity);
 
       if (aRank !== bRank) {
         return bRank - aRank;
@@ -68,6 +59,18 @@ function AlertsPanel({
 
       return b.alerts.length - a.alerts.length;
     });
+
+
+  const sortedAlertSummary = Object.values(alertSummary).sort((a, b) => {
+    const aRank = getSeverityRank(a.severity);
+    const bRank = getSeverityRank(b.severity);
+
+    if (aRank !== bRank) {
+      return bRank - aRank;
+    }
+
+    return b.count - a.count;
+  });
 
   return (
     <aside className="alerts-panel">
@@ -84,7 +87,7 @@ function AlertsPanel({
         <p className="empty-alerts">No active alerts</p>
       ) : (
         <div className="summary-list">
-          {Object.values(alertSummary).map((item) => (
+          {sortedAlertSummary.map((item) => (
             <div className="summary-row" key={item.type}>
               <div>
                 <strong style={{ color: getSeverityColor(item.severity) }}>

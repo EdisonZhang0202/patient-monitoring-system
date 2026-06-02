@@ -1,16 +1,12 @@
+export const severityOrder = {
+  critical: 4,
+  high: 3,
+  medium: 2,
+  low: 1,
+};
+
 export const getSeverityRank = (severity) => {
-  switch (severity) {
-    case "critical":
-      return 4;
-    case "high":
-      return 3;
-    case "medium":
-      return 2;
-    case "low":
-      return 1;
-    default:
-      return 0;
-  }
+  return severityOrder[severity] || 0;
 };
 
 export const getSeverityColor = (severity) => {
