@@ -8,7 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-
+import PatientNotes from "../components/PatientNotes/PatientNotes";
 import "../styles/PatientDetail.css";
 
 const getSeverityColor = (severity) => {
@@ -145,6 +145,7 @@ function PatientDetail() {
             ))}
           </div>
         )}
+        <PatientNotes patientId={patientId} />
       </section>
 
       <section className="detail-section">
