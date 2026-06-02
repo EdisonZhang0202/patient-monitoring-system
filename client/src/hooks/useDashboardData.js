@@ -1,13 +1,37 @@
 import { useEffect } from "react";
+import { formatVitalForChart } from "../utils/vitals";
 
-const formatVitalForChart = (vital) => ({
-  time: new Date(vital.timestamp).toLocaleTimeString(),
-  heartRate: vital.heartRate,
-  systolicBP: vital.systolicBP,
-  diastolicBP: vital.diastolicBP,
-  oxygenSaturation: vital.oxygenSaturation,
-  temperature: vital.temperature,
-});
+const fetchJson = async (url) => {
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.status}`);
+  }
+
+  return response.json();
+};
+
+const loadPatientVitals = async (patient) => {
+  const vitals = await fetchJson(
+    `http://localhost:5000/api/patients/${patient._id}/vitals`
+  );
+
+  const recentVitals = vitals.slice(0, 10).reverse();
+
+  if (recentVitals.length === 0) {
+    return {
+      patientId: patient._id,
+      latestVital: null,
+      chartHistory: [],
+    };
+  }
+
+  return {
+    patientId: patient._id,
+    latestVital: recentVitals[recentVitals.length - 1],
+    chartHistory: recentVitals.map(formatVitalForChart),
+  };
+};
 
 export const useDashboardData = ({
   setPatients,
@@ -16,52 +40,64 @@ export const useDashboardData = ({
   setAlerts,
 }) => {
   useEffect(() => {
-    fetch("http://localhost:5000/api/patients")
-      .then((response) => response.json())
-      .then((data) => {
-        setPatients(data);
+    const loadDashboardData = async () => {
+      try {
+        const patients = await fetchJson("http://localhost:5000/api/patients");
 
-        data.forEach(async (patient) => {
-          try {
-            const response = await fetch(
-              `http://localhost:5000/api/patients/${patient._id}/vitals`
-            );
+        if (!Array.isArray(patients)) {
+          console.error("Expected patients array but received:", patients);
+          setPatients([]);
+          return;
+        }
 
-            if (!response.ok) return;
+        setPatients(patients);
 
-            const vitals = await response.json();
+        const patientVitals = await Promise.all(
+          patients.map((patient) => loadPatientVitals(patient))
+        );
 
-            const recentVitals = vitals.slice(0, 10).reverse();
+        setLatestVitals((previousVitals) => {
+          const nextVitals = { ...previousVitals };
 
-            if (recentVitals.length > 0) {
-              const latestVital = recentVitals[recentVitals.length - 1];
-
-              setLatestVitals((previousVitals) => ({
-                ...previousVitals,
-                [patient._id]: latestVital,
-              }));
-
-              setVitalsHistory((previousHistory) => ({
-                ...previousHistory,
-                [patient._id]: recentVitals.map(formatVitalForChart),
-              }));
+          patientVitals.forEach(({ patientId, latestVital }) => {
+            if (latestVital) {
+              nextVitals[patientId] = latestVital;
             }
-          } catch (error) {
-            console.error("Failed to fetch patient vitals:", error);
-          }
-        });
-      })
-      .catch((error) => {
-        console.error("Failed to fetch patients:", error);
-      });
+          });
 
-    fetch("http://localhost:5000/api/alerts")
-      .then((response) => response.json())
-      .then((data) => {
-        setAlerts(data.filter((alert) => !alert.acknowledged));
-      })
-      .catch((error) => {
-        console.error("Failed to fetch alerts:", error);
-      });
+          return nextVitals;
+        });
+
+        setVitalsHistory((previousHistory) => {
+          const nextHistory = { ...previousHistory };
+
+          patientVitals.forEach(({ patientId, chartHistory }) => {
+            if (chartHistory.length > 0) {
+              nextHistory[patientId] = chartHistory;
+            }
+          });
+
+          return nextHistory;
+        });
+      } catch (error) {
+        console.error("Failed to load dashboard patients:", error);
+      }
+
+      try {
+        const alerts = await fetchJson("http://localhost:5000/api/alerts");
+
+        if (!Array.isArray(alerts)) {
+          console.error("Expected alerts array but received:", alerts);
+          setAlerts([]);
+          return;
+        }
+
+        setAlerts(alerts.filter((alert) => !alert.acknowledged));
+      } catch (error) {
+        console.error("Failed to load dashboard alerts:", error);
+      }
+    };
+
+    loadDashboardData();
   }, [setPatients, setLatestVitals, setVitalsHistory, setAlerts]);
 };

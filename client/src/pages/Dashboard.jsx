@@ -9,6 +9,11 @@ import DashboardStats from "../components/DashboardStats/DashboardStats";
 import AlertDetailsModal from "../components/AlertDetailsModal/AlertDetailsModal";
 
 import {
+  filterPatientsByStatus,
+  searchPatients,
+} from "../utils/patientFilters";
+
+import {
   getSeverityRank,
   getVitalForAlertType,
 } from "../utils/severity";
@@ -45,18 +50,6 @@ function Dashboard() {
     setLastUpdated,
   });
 
-  const patientAlertMap = useMemo(() => {
-    return alerts.reduce((map, alert) => {
-      if (!map[alert.patientId]) {
-        map[alert.patientId] = [];
-      }
-
-      map[alert.patientId].push(alert);
-
-      return map;
-    }, {});
-  }, [alerts]);
-
   const patientLookup = useMemo(() => {
     return patients.reduce((map, patient) => {
       map[patient._id] = patient;
@@ -65,27 +58,52 @@ function Dashboard() {
     }, {});
   }, [patients]);
 
-  const alertsByPatient = useMemo(() => {
-    return alerts.reduce((groups, alert) => {
-      const patient = patientLookup[alert.patientId];
-      const patientKey = alert.patientId;
+  const { patientAlertMap, alertsByPatient } = useMemo(() => {
+    return alerts.reduce(
+      (result, alert) => {
+        if (!result.patientAlertMap[alert.patientId]) {
+          result.patientAlertMap[alert.patientId] = [];
+        }
 
-      if (!groups[patientKey]) {
-        groups[patientKey] = {
-          patient,
-          alerts: [],
-        };
+        result.patientAlertMap[alert.patientId].push(alert);
+
+        const patient = patientLookup[alert.patientId];
+
+        if (!result.alertsByPatient[alert.patientId]) {
+          result.alertsByPatient[alert.patientId] = {
+            patient,
+            alerts: [],
+          };
+        }
+
+        result.alertsByPatient[alert.patientId].alerts.push(alert);
+
+        return result;
+      },
+      {
+        patientAlertMap: {},
+        alertsByPatient: {},
       }
-
-      groups[patientKey].alerts.push(alert);
-
-      return groups;
-    }, {});
+    );
   }, [alerts, patientLookup]);
 
-  const selectedPatientAlerts = selectedAlert
-    ? alertsByPatient[selectedAlert.patientId]?.alerts || []
-    : [];
+  const selectedPatientAlerts = useMemo(() => {
+    return selectedAlert
+      ? alertsByPatient[selectedAlert.patientId]?.alerts || []
+      : [];
+  }, [selectedAlert, alertsByPatient]);
+
+  const selectedAlertPatient = useMemo(() => {
+    return selectedAlert
+      ? patientLookup[selectedAlert.patientId]
+      : null;
+  }, [selectedAlert, patientLookup]);
+
+  const selectedAlertVital = useMemo(() => {
+    return selectedAlert
+      ? latestVitals[selectedAlert.patientId]
+      : null;
+  }, [selectedAlert, latestVitals]);
 
   const sortedPatients = useMemo(() => {
     return [...patients].sort((a, b) => {
@@ -124,65 +142,18 @@ function Dashboard() {
     });
   }, [patients, patientAlertMap]);
 
-  const selectedAlertPatient = selectedAlert
-    ? patientLookup[selectedAlert.patientId]
-    : null;
 
-  const selectedAlertVital = selectedAlert
-    ? latestVitals[selectedAlert.patientId]
-    : null;
 
   const filteredPatients = useMemo(() => {
-    switch (patientFilter) {
-      case "critical":
-        return sortedPatients.filter((patient) => {
-          const alerts = patientAlertMap[patient._id] || [];
-
-          return alerts.some(
-            (alert) => alert.severity === "critical"
-          );
-        });
-
-      case "high":
-        return sortedPatients.filter((patient) => {
-          const alerts = patientAlertMap[patient._id] || [];
-
-          return alerts.some(
-            (alert) => alert.severity === "high"
-          );
-        });
-
-      case "stable":
-        return sortedPatients.filter(
-          (patient) =>
-            patient.status === "stable" &&
-            (patientAlertMap[patient._id] || []).length === 0
-        );
-
-      case "discharged":
-        return sortedPatients.filter(
-          (patient) => patient.status === "discharged"
-        );
-
-      default:
-        return sortedPatients;
-    }
+    return filterPatientsByStatus({
+      patients: sortedPatients,
+      patientFilter,
+      patientAlertMap,
+    });
   }, [sortedPatients, patientFilter, patientAlertMap]);
 
   const searchedPatients = useMemo(() => {
-    const searchValue = patientSearch.toLowerCase().trim();
-
-    if (!searchValue) {
-      return filteredPatients;
-    }
-
-    return filteredPatients.filter((patient) => {
-      return (
-        patient.name.toLowerCase().includes(searchValue) ||
-        patient.room.toLowerCase().includes(searchValue) ||
-        patient.diagnosis.toLowerCase().includes(searchValue)
-      );
-    });
+    return searchPatients(filteredPatients, patientSearch);
   }, [filteredPatients, patientSearch]);
 
   const alertSummary = useMemo(() => {
@@ -256,6 +227,11 @@ function Dashboard() {
       <main className="dashboard-layout">
         <section className="patients-section">
           <div className="section-title">
+            <h2>Patients</h2>
+            <span>Alerts shown first</span>
+          </div>
+
+          <div className="patient-controls">
             <div className="patient-filters">
               <button
                 className={patientFilter === "all" ? "active" : ""}
@@ -291,16 +267,13 @@ function Dashboard() {
               >
                 Discharged
               </button>
-              <input
-                className="patient-search"
-                placeholder="Search patients by name, room, or diagnosis..."
-                value={patientSearch}
-                onChange={(event) => setPatientSearch(event.target.value)}
-              />
             </div>
-
-            <h2>Patients</h2>
-            <span>Alerts shown first</span>
+            <input
+              className="patient-search"
+              placeholder="Search patients by name, room, or diagnosis..."
+              value={patientSearch}
+              onChange={(event) => setPatientSearch(event.target.value)}
+            />
           </div>
 
           <div className="patient-grid">

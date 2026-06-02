@@ -1,5 +1,24 @@
 import { useEffect } from "react";
 import { io } from "socket.io-client";
+import { formatVitalForChart } from "../utils/vitals";
+
+const upsertAlert = (alerts, updatedAlert) => {
+  if (updatedAlert.acknowledged) {
+    return alerts.filter((alert) => alert._id !== updatedAlert._id);
+  }
+
+  const alreadyExists = alerts.some(
+    (alert) => alert._id === updatedAlert._id
+  );
+
+  if (alreadyExists) {
+    return alerts.map((alert) =>
+      alert._id === updatedAlert._id ? updatedAlert : alert
+    );
+  }
+
+  return [updatedAlert, ...alerts];
+};
 
 export const useDashboardSocket = ({
   setLatestVitals,
@@ -29,14 +48,7 @@ export const useDashboardSocket = ({
           ...previousHistory,
           [vital.patientId]: [
             ...patientHistory,
-            {
-              time: new Date(vital.timestamp).toLocaleTimeString(),
-              heartRate: vital.heartRate,
-              systolicBP: vital.systolicBP,
-              diastolicBP: vital.diastolicBP,
-              oxygenSaturation: vital.oxygenSaturation,
-              temperature: vital.temperature,
-            },
+            formatVitalForChart(vital),
           ].slice(-10),
         };
       });
@@ -57,25 +69,9 @@ export const useDashboardSocket = ({
     });
 
     socket.on("alertUpdated", (updatedAlert) => {
-      setAlerts((previousAlerts) => {
-        if (updatedAlert.acknowledged) {
-          return previousAlerts.filter(
-            (alert) => alert._id !== updatedAlert._id
-          );
-        }
-
-        const alreadyExists = previousAlerts.some(
-          (alert) => alert._id === updatedAlert._id
-        );
-
-        if (alreadyExists) {
-          return previousAlerts.map((alert) =>
-            alert._id === updatedAlert._id ? updatedAlert : alert
-          );
-        }
-
-        return [updatedAlert, ...previousAlerts];
-      });
+      setAlerts((previousAlerts) =>
+        upsertAlert(previousAlerts, updatedAlert)
+      );
     });
 
     socket.on("alertAcknowledged", (updatedAlert) => {
