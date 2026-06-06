@@ -5,8 +5,10 @@ import {
   getPatientById,
   updatePatient,
 } from "../controllers/patientController.js";
-
+import { protect } from "../middleware/authMiddleware.js";
 const router = express.Router();
+
+router.use(protect);
 
 router.get("/", getPatients);
 router.post("/", createPatient);
