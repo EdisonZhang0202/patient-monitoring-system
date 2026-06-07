@@ -7,6 +7,7 @@ import PatientCard from "../components/PatientCard/PatientCard";
 import EditPatientModal from "../components/EditPatientModal/EditPatientModal";
 import DashboardStats from "../components/DashboardStats/DashboardStats";
 import AlertDetailsModal from "../components/AlertDetailsModal/AlertDetailsModal";
+import { fetchJson } from "../utils/api";
 
 import {
   filterPatientsByStatus,
@@ -182,17 +183,14 @@ function Dashboard() {
 
   const acknowledgeAlert = async (alertId) => {
     try {
-      await fetch(
+      await fetchJson(
         `http://localhost:5000/api/alerts/${alertId}/acknowledge`,
         {
           method: "PATCH",
         }
       );
     } catch (error) {
-      console.error(
-        "Failed to acknowledge alert:",
-        error
-      );
+      console.error("Failed to acknowledge alert:", error);
     }
   };
 

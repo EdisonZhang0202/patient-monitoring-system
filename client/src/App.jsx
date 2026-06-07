@@ -5,31 +5,65 @@ import PatientDetail from "./pages/PatientDetail";
 import PatientAlertHistory from "./pages/PatientAlertHistory";
 import PatientActivityLog from "./pages/PatientActivityLog";
 import NotesHistory from "./pages/NotesHistory";
+import Login from "./pages/Login";
+
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
 
-        <Route path="/patients/:patientId" element={<PatientDetail />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/patients/:patientId/alerts"
-          element={<PatientAlertHistory />}
-        />
+          <Route
+            path="/patients/:patientId"
+            element={
+              <ProtectedRoute>
+                <PatientDetail />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/patients/:patientId/activity"
-          element={<PatientActivityLog />}
-        />
+          <Route
+            path="/patients/:patientId/alerts"
+            element={
+              <ProtectedRoute>
+                <PatientAlertHistory />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/patients/:patientId/notes"
-          element={<NotesHistory />}
-        />
-      </Routes>
-    </BrowserRouter>
+          <Route
+            path="/patients/:patientId/activity"
+            element={
+              <ProtectedRoute>
+                <PatientActivityLog />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/patients/:patientId/notes"
+            element={
+              <ProtectedRoute>
+                <NotesHistory />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

@@ -1,15 +1,6 @@
 import { useEffect } from "react";
 import { formatVitalForChart } from "../utils/vitals";
-
-const fetchJson = async (url) => {
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    throw new Error(`Request failed: ${response.status}`);
-  }
-
-  return response.json();
-};
+import { fetchJson } from "../utils/api";
 
 const loadPatientVitals = async (patient) => {
   const vitals = await fetchJson(

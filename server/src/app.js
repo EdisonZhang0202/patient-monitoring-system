@@ -15,7 +15,7 @@ app.use(express.json());
 
 app.use("/health", healthRoutes);
 app.use("/api/patients", patientRoutes);
-app.use("/api", vitalRoutes);
+app.use("/api/patients", vitalRoutes);
 app.use("/api/alerts", alertRoutes);
 app.use("/api/events", eventLogRoutes);
 app.use("/api/patients", patientNoteRoutes);
