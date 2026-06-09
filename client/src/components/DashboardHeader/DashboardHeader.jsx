@@ -1,4 +1,15 @@
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+
 function DashboardHeader({ lastUpdated, onAddPatientClick }) {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   return (
     <header className="dashboard-header">
       <div>
@@ -9,6 +20,10 @@ function DashboardHeader({ lastUpdated, onAddPatientClick }) {
 
       <div className="header-status">
         <span>
+          {user ? `${user.name} · ${user.role}` : "Not signed in"}
+        </span>
+
+        <span>
           Last updated:{" "}
           {lastUpdated ? lastUpdated.toLocaleTimeString() : "Waiting..."}
         </span>
@@ -16,11 +31,12 @@ function DashboardHeader({ lastUpdated, onAddPatientClick }) {
         <span className="live-dot" />
         <span>Live</span>
 
-        <button
-          className="add-patient-button"
-          onClick={onAddPatientClick}
-        >
+        <button className="add-patient-button" onClick={onAddPatientClick}>
           + Add New Patient
+        </button>
+
+        <button className="logout-button" onClick={handleLogout}>
+          Logout
         </button>
       </div>
     </header>

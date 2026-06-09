@@ -11,3 +11,17 @@
 .add-patient-button:hover {
   background: #1d4ed8;
 }
+
+.logout-button {
+  border: 1px solid rgba(248, 113, 113, 0.5);
+  border-radius: 12px;
+  padding: 10px 14px;
+  background: rgba(127, 29, 29, 0.35);
+  color: #fca5a5;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  background: rgba(127, 29, 29, 0.55);
+}
