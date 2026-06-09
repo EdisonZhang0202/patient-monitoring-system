@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./AddPatientModal.css";
+import { fetchJson } from "../../utils/api";
 
 function AddPatientModal({ isOpen, onClose, onPatientCreated }) {
   const [newPatient, setNewPatient] = useState({
@@ -18,7 +19,7 @@ function AddPatientModal({ isOpen, onClose, onPatientCreated }) {
     event.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:5000/api/patients", {
+      const createdPatient = await fetchJson("http://localhost:5000/api/patients", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -28,8 +29,6 @@ function AddPatientModal({ isOpen, onClose, onPatientCreated }) {
           age: Number(newPatient.age),
         }),
       });
-
-      const createdPatient = await response.json();
 
       onPatientCreated(createdPatient);
 

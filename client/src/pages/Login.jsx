@@ -1,7 +1,7 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { fetchJson } from "../utils/api";
 import "../styles/Login.css";
 
 function Login() {
@@ -24,7 +24,7 @@ function Login() {
     setError("");
 
     try {
-      const response = await fetch(
+      const data = await fetchJson(
         "http://localhost:5000/api/auth/login",
         {
           method: "POST",
@@ -38,29 +38,6 @@ function Login() {
         }
       );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.message || "Login failed"
-        );
-      }
-
-      localStorage.setItem(
-        "token",
-        data.token
-      );
-
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          _id: data._id,
-          name: data.name,
-          email: data.email,
-          role: data.role,
-        })
-      );
-
       login({
         token: data.token,
         user: {
@@ -68,7 +45,7 @@ function Login() {
           name: data.name,
           email: data.email,
           role: data.role,
-        }
+        },
       });
 
       navigate("/");

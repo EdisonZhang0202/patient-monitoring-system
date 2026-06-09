@@ -2,14 +2,14 @@ import { useEffect, useState } from "react";
 import "./PatientNotes.css";
 import { io } from "socket.io-client";
 import { Link } from "react-router-dom";
+import { fetchJson } from "../../utils/api";
 
 function PatientNotes({ patientId }) {
     const [notes, setNotes] = useState([]);
     const [noteText, setNoteText] = useState("");
 
     useEffect(() => {
-        fetch(`http://localhost:5000/api/patients/${patientId}/notes`)
-            .then((response) => response.json())
+        fetchJson(`http://localhost:5000/api/patients/${patientId}/notes`)
             .then((data) => setNotes(data))
             .catch((error) => {
                 console.error("Failed to fetch notes:", error);
@@ -50,7 +50,7 @@ function PatientNotes({ patientId }) {
         }
 
         try {
-            const response = await fetch(
+            const createdNote = await fetchJson(
                 `http://localhost:5000/api/patients/${patientId}/notes`,
                 {
                     method: "POST",
@@ -64,9 +64,18 @@ function PatientNotes({ patientId }) {
                 }
             );
 
-            const createdNote = await response.json();
+            setNotes((previousNotes) => {
+                const alreadyExists = previousNotes.some(
+                    (note) => note._id === createdNote._id
+                );
 
-            setNotes((previousNotes) => [createdNote, ...previousNotes]);
+                if (alreadyExists) {
+                    return previousNotes;
+                }
+
+                return [createdNote, ...previousNotes];
+            });
+
             setNoteText("");
         } catch (error) {
             console.error("Failed to create note:", error);

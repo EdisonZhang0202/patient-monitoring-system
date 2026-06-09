@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { fetchJson } from "../../utils/api";
 import "./EditPatientModal.css";
 
 function EditPatientModal({ isOpen, patient, onClose, onPatientUpdated }) {
@@ -30,7 +31,7 @@ function EditPatientModal({ isOpen, patient, onClose, onPatientUpdated }) {
     event.preventDefault();
 
     try {
-      const response = await fetch(
+      const updatedPatient = await fetchJson(
         `http://localhost:5000/api/patients/${patient._id}`,
         {
           method: "PATCH",
@@ -43,8 +44,6 @@ function EditPatientModal({ isOpen, patient, onClose, onPatientUpdated }) {
           }),
         }
       );
-
-      const updatedPatient = await response.json();
 
       onPatientUpdated(updatedPatient);
       onClose();

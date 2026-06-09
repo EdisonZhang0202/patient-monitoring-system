@@ -6,6 +6,7 @@ import vitalRoutes from "./routes/vitalRoutes.js";
 import alertRoutes from "./routes/alertRoutes.js";
 import eventLogRoutes from "./routes/eventLogRoutes.js";
 import patientNoteRoutes from "./routes/patientNoteRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 
 const app = express();
@@ -20,5 +21,6 @@ app.use("/api/alerts", alertRoutes);
 app.use("/api/events", eventLogRoutes);
 app.use("/api/patients", patientNoteRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 export default app;

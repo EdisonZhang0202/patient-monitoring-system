@@ -7,12 +7,10 @@ function PatientAlertHistory() {
   const [alerts, setAlerts] = useState([]);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/patients/${patientId}`)
-      .then((response) => response.json())
+    fetchJson(`http://localhost:5000/api/patients/${patientId}`)
       .then((data) => setPatient(data));
 
-    fetch("http://localhost:5000/api/alerts")
-      .then((response) => response.json())
+    fetchJson("http://localhost:5000/api/alerts")
       .then((data) => {
         setAlerts(data.filter((alert) => alert.patientId === patientId));
       });

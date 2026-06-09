@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { fetchJson } from "../utils/api";
 import "../styles/NotesHistory.css";
 
 function NotesHistory() {
@@ -9,12 +10,11 @@ function NotesHistory() {
   const [notes, setNotes] = useState([]);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/patients/${patientId}`)
-      .then((response) => response.json())
+    fetchJson(`http://localhost:5000/api/patients/${patientId}`)
       .then((data) => setPatient(data));
 
-    fetch(`http://localhost:5000/api/patients/${patientId}/notes`)
-      .then((response) => response.json())
+    fetchJson(`http://localhost:5000/api/patients/${patientId}/notes`)
+      .then((data) => setNotes(data))
       .then((data) => setNotes(data))
       .catch((error) => {
         console.error("Failed to fetch notes:", error);

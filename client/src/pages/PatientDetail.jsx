@@ -10,6 +10,7 @@ import {
 } from "recharts";
 import PatientNotes from "../components/PatientNotes/PatientNotes";
 import "../styles/PatientDetail.css";
+import { fetchJson } from "../utils/api";
 
 const getSeverityColor = (severity) => {
   switch (severity) {
@@ -32,16 +33,14 @@ function PatientDetail() {
   const [vitalsHistory, setVitalsHistory] = useState([]);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/patients/${patientId}`)
-      .then((response) => response.json())
+    fetchJson(`http://localhost:5000/api/patients/${patientId}`)
       .then((data) => {
         setPatient(data);
       });
 
-    fetch(
+    fetchJson(
       `http://localhost:5000/api/patients/${patientId}/vitals`
     )
-      .then((response) => response.json())
       .then((data) => {
         if (data.length > 0) {
           setLatestVital(data[data.length - 1]);
@@ -59,8 +58,7 @@ function PatientDetail() {
         }
       });
 
-    fetch(`http://localhost:5000/api/alerts`)
-      .then((response) => response.json())
+    fetchJson(`http://localhost:5000/api/alerts`)
       .then((data) => {
         const patientAlerts = data.filter(
           (alert) => alert.patientId === patientId
@@ -69,8 +67,7 @@ function PatientDetail() {
         setAlerts(patientAlerts);
       });
 
-    fetch(`http://localhost:5000/api/events?patientId=${patientId}`)
-      .then((response) => response.json())
+    fetchJson(`http://localhost:5000/api/events?patientId=${patientId}`)
       .then((data) => {
         setEvents(data);
       });

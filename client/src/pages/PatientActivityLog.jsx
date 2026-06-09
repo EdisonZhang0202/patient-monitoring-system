@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { fetchJson } from "../utils/api";
 
 function PatientActivityLog() {
   const { patientId } = useParams();
@@ -7,12 +8,10 @@ function PatientActivityLog() {
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/patients/${patientId}`)
-      .then((response) => response.json())
+    fetchJson(`http://localhost:5000/api/patients/${patientId}`)
       .then((data) => setPatient(data));
 
-    fetch(`http://localhost:5000/api/events?patientId=${patientId}`)
-      .then((response) => response.json())
+    fetchJson(`http://localhost:5000/api/events?patientId=${patientId}`)
       .then((data) => setEvents(data));
   }, [patientId]);
 

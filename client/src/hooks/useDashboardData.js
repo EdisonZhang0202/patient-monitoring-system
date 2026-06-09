@@ -33,62 +33,27 @@ export const useDashboardData = ({
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
-        const patients = await fetchJson("http://localhost:5000/api/patients");
-
-        if (!Array.isArray(patients)) {
-          console.error("Expected patients array but received:", patients);
-          setPatients([]);
-          return;
-        }
-
-        setPatients(patients);
-
-        const patientVitals = await Promise.all(
-          patients.map((patient) => loadPatientVitals(patient))
+        const dashboardData = await fetchJson(
+          "http://localhost:5000/api/dashboard"
         );
 
-        setLatestVitals((previousVitals) => {
-          const nextVitals = { ...previousVitals };
-
-          patientVitals.forEach(({ patientId, latestVital }) => {
-            if (latestVital) {
-              nextVitals[patientId] = latestVital;
-            }
-          });
-
-          return nextVitals;
-        });
-
-        setVitalsHistory((previousHistory) => {
-          const nextHistory = { ...previousHistory };
-
-          patientVitals.forEach(({ patientId, chartHistory }) => {
-            if (chartHistory.length > 0) {
-              nextHistory[patientId] = chartHistory;
-            }
-          });
-
-          return nextHistory;
-        });
+        setPatients(dashboardData.patients);
+        setAlerts(dashboardData.alerts);
+        setLatestVitals(dashboardData.latestVitals);
+        setVitalsHistory(dashboardData.vitalsHistory);
       } catch (error) {
-        console.error("Failed to load dashboard patients:", error);
-      }
-
-      try {
-        const alerts = await fetchJson("http://localhost:5000/api/alerts");
-
-        if (!Array.isArray(alerts)) {
-          console.error("Expected alerts array but received:", alerts);
-          setAlerts([]);
-          return;
-        }
-
-        setAlerts(alerts.filter((alert) => !alert.acknowledged));
-      } catch (error) {
-        console.error("Failed to load dashboard alerts:", error);
+        console.error(
+          "Failed to load dashboard data:",
+          error
+        );
       }
     };
 
     loadDashboardData();
-  }, [setPatients, setLatestVitals, setVitalsHistory, setAlerts]);
+  }, [
+    setPatients,
+    setLatestVitals,
+    setVitalsHistory,
+    setAlerts,
+  ]);
 };
